@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { initializeGemini, sendMessageStream, resetChat } from '../gemini/geminiChat';
+//<<<<<<< Agent-Feature-Developement
+import { initializeGemini, sendMessage, resetChat, analyzeConfirmation, analyzeTheme } from '../gemini/geminiChat';
+//=======
+//import { initializeGemini, sendMessageStream, resetChat } from '../gemini/geminiChat';
+//>>>>>>> main
 import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
-const ChatArea = ({ sidebarMode }) => {
+const ChatArea = (props) => {
+    const { sidebarMode } = props;
     const [messages, setMessages] = useState([
         { id: 1, sender: 'agent', text: 'Hey What\'s up?' },
     ]);
@@ -13,6 +18,11 @@ const ChatArea = ({ sidebarMode }) => {
     const streamTargetRef = useRef('');
     const streamDoneRef = useRef(false);
     const revealIntervalRef = useRef(null);
+
+    // Track if we have successfully suggested a theme/tool
+    const hasSuggestedThemeRef = useRef(false);
+    // Track pending suggestion to wait for user confirmation
+    const pendingSuggestionRef = useRef(null);
 
     useEffect(() => {
         try {
@@ -64,6 +74,63 @@ const ChatArea = ({ sidebarMode }) => {
         }, 20);
 
         try {
+            let systemInjection = "";
+            let shouldAnalyzeTheme = !hasSuggestedThemeRef.current;
+
+            // 1. Check if we are waiting for confirmation
+            if (pendingSuggestionRef.current) {
+                const confirmation = await analyzeConfirmation(userText);
+                console.log("Confirmation usage:", confirmation);
+
+                if (confirmation.isConfirmed) {
+                    // User said YES -> Trigger the pending action
+                    if (props.onThemeAction) {
+                        const { type, target } = pendingSuggestionRef.current;
+                        props.onThemeAction(type, target);
+                    }
+                    hasSuggestedThemeRef.current = true; // Mark as done
+                    pendingSuggestionRef.current = null; // Clear pending
+                    shouldAnalyzeTheme = false; // Don't re-analyze theme
+                    systemInjection = `[SYSTEM: User confirmed suggestion. Action: Navigation triggered. Briefly acknowledge and encourage them.] `;
+                } else {
+                    // User said NO or ignored -> Clear pending, re-analyze?
+                    pendingSuggestionRef.current = null;
+                }
+            }
+
+            // 2. Analyze Theme (if not confirmed yet and nothing pending)
+            if (shouldAnalyzeTheme) {
+                const analysis = await analyzeTheme(userText);
+                console.log("Analysis Result:", analysis);
+
+                if (analysis.theme && analysis.theme !== 'Unclear') {
+                    // Found a clear theme -> But do NOT trigger yet. Ask for confirmation.
+                    let suggestedAction = null;
+
+                    if (analysis.theme === 'Specificity') {
+                        suggestedAction = { type: 'mode', target: 'visualizer' };
+                        systemInjection = "[SYSTEM: Matches Theme: Specificity. Action: SUGGEST 'Visualizer'. Ask: 'Would you like to try the Visualizer to map this out?'] ";
+                    } else if (analysis.theme === 'Complexity') {
+                        suggestedAction = { type: 'mode', target: 'mind_map' };
+                        systemInjection = "[SYSTEM: Matches Theme: Complexity. Action: SUGGEST 'Mind Map'. Ask: 'Would you like to use a Mind Map to organize your thoughts?'] ";
+                    } else if (analysis.theme === 'Simplicity') {
+                        if (analysis.targetGame) {
+                            suggestedAction = { type: 'game', target: analysis.targetGame };
+                            systemInjection = `[SYSTEM: Matches Theme: Simplicity/Emotion. Action: SUGGEST Game '${analysis.targetGame}'. Ask: 'Would you like to play ${analysis.targetGame} to help regulate this?'] `;
+                        }
+                    }
+
+                    if (suggestedAction) {
+                        pendingSuggestionRef.current = suggestedAction; // Store for NEXT turn
+                        // Do NOT set hasSuggestedThemeRef.current = true yet. Only after confirmation.
+                    }
+
+                } else {
+                    // Theme is Unclear
+                    systemInjection = "[SYSTEM: Analysis: Unclear. Action: ASK CLARIFYING QUESTION. Do NOT give advice yet. Ask a specific question to categorize them into Specificity (Event), Complexity (Relationship), or Simplicity (Emotion).] ";
+                }
+            }
+
             // Contextualize the message based on sidebar mode
             let contextPrefix = "";
             if (sidebarMode) {
@@ -71,9 +138,18 @@ const ChatArea = ({ sidebarMode }) => {
                 contextPrefix = `[User is currently in "${modeName}" view] `;
             }
 
-            const finalText = await sendMessageStream(contextPrefix + userText, (accumulated) => {
-                streamTargetRef.current = accumulated;
-            });
+//<<<<<<< Agent-Feature-Developement
+            // Send actual message with injected system instruction to guide the agent's response
+            const fullPrompt = systemInjection + contextPrefix + userText;
+            console.log("--- DEBUG: SENDING MESSAGE ---");
+            console.log("System Injection:", systemInjection);
+            console.log("Full Prompt:", fullPrompt);
+            const responseText = await sendMessage(fullPrompt);
+//=======
+//            const finalText = await sendMessageStream(contextPrefix + userText, (accumulated) => {
+//                streamTargetRef.current = accumulated;
+//            });
+//>>>>>>> main
 
             streamDoneRef.current = true;
 
@@ -101,6 +177,9 @@ const ChatArea = ({ sidebarMode }) => {
         clearInterval(revealIntervalRef.current);
         resetChat();
         stopAudio();
+        // Reset theme tracking on chat reset
+        if (hasSuggestedThemeRef.current) hasSuggestedThemeRef.current = false;
+        pendingSuggestionRef.current = null;
         setMessages([{ id: Date.now(), sender: 'agent', text: 'Chat reset. How can I help you now?' }]);
     };
 

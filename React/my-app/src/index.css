@@ -81,3 +81,25 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@keyframes neonPulse {
+  0% {
+    box-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 15px #ff00ff;
+  }
+
+  50% {
+    box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff, 0 0 30px #ff00ff;
+  }
+
+  100% {
+    box-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 15px #ff00ff;
+  }
+}
+
+.suggested-tile-glow {
+  animation: neonPulse 2s infinite alternate;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  /* Optional: add a border to make it pop more */
+  z-index: 10;
+  /* Ensure it stays on top */
+}

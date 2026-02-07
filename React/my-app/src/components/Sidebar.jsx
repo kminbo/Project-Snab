@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { Reorder } from 'framer-motion';
 import '../App.css';
 import { getGames } from '../data/gameRegistry';
@@ -7,8 +7,9 @@ import gamesCover from '../assets/ModeCovers/games-cover.jpg';
 import mindMapCover from '../assets/ModeCovers/mind-map-cover.jpg';
 import visualizerCover from '../assets/ModeCovers/visualizer-cover.jpg';
 
-const Sidebar = ({ mode, setMode }) => {
+const Sidebar = forwardRef(({ mode, setMode }, ref) => {
     const [activeGame, setActiveGame] = useState(null);
+    const [suggestedTileId, setSuggestedTileId] = useState(null);
 
     // Initialize standard games list
     const initialGames = useMemo(() => getGames(), []);
@@ -23,9 +24,37 @@ const Sidebar = ({ mode, setMode }) => {
     // Initialize game tiles state
     const [gameTiles, setGameTiles] = useState(initialGames);
 
+    useImperativeHandle(ref, () => ({
+        reorderModeTiles: (targetModeId) => {
+            const index = modeTiles.findIndex(t => t.id === targetModeId);
+            if (index > -1) {
+                const newTiles = [...modeTiles];
+                const [targetTile] = newTiles.splice(index, 1);
+                newTiles.unshift(targetTile);
+                setModeTiles(newTiles);
+                setMode(targetModeId); // Auto-navigate to it
+                setSuggestedTileId(targetModeId); // Highlight it
+            }
+        },
+        reorderGameTiles: (targetGameName) => {
+            const index = gameTiles.findIndex(g => g.name === targetGameName);
+            if (index > -1) {
+                const newTiles = [...gameTiles];
+                const [targetTile] = newTiles.splice(index, 1);
+                newTiles.unshift(targetTile);
+                setGameTiles(newTiles);
+                setMode('game_selection'); // Go to game selection to show it
+                setSuggestedTileId(targetTile.id); // Highlight it (using ID from game object)
+            }
+        }
+    }));
+
     const handleGameClick = (game) => {
         setActiveGame(game);
         setMode('game_play');
+        if (suggestedTileId === game.id) {
+            setSuggestedTileId(null); // Remove highlight on click
+        }
     };
 
     // Helper to render the back button
@@ -35,27 +64,19 @@ const Sidebar = ({ mode, setMode }) => {
         </button>
     );
 
-    // Programmatic reordering functions (available w/in code)
-    const shuffleModeTiles = () => {
-        const shuffled = [...modeTiles].sort(() => Math.random() - 0.5);
-        setModeTiles(shuffled);
-    };
-
-    const shuffleGameTiles = () => {
-        const shuffled = [...gameTiles].sort(() => Math.random() - 0.5);
-        setGameTiles(shuffled);
-    };
-
     // 1. Mode Selection (Default)
     if (mode === 'mode_selection') {
         return (
             <div className="sidebar mode-selection">
-                <Reorder.Group axis="y" values={modeTiles} onReorder={setModeTiles} className="reorder-group" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <Reorder.Group axis="y" values={modeTiles} onReorder={setModeTiles} className="reorder-group" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '14px', padding: 0 }}>
                     {modeTiles.map((tile) => (
                         <Reorder.Item key={tile.id} value={tile} className="mode-tile-wrapper" style={{ listStyle: 'none' }}>
                             <div
-                                className="game-tile"
-                                onClick={() => setMode(tile.id)}
+                                className={`game-tile ${suggestedTileId === tile.id ? 'suggested-tile-glow' : ''}`}
+                                onClick={() => {
+                                    setMode(tile.id);
+                                    if (suggestedTileId === tile.id) setSuggestedTileId(null);
+                                }}
                                 style={{
                                     backgroundImage: `url(${tile.coverImage})`,
                                     backgroundSize: 'cover',
@@ -70,8 +91,6 @@ const Sidebar = ({ mode, setMode }) => {
                         </Reorder.Item>
                     ))}
                 </Reorder.Group>
-                {/* valid "within code" usage example: hidden by default or dev-only */}
-                {/* <button onClick={shuffleModeTiles} style={{marginTop: 'auto', fontSize: '0.8rem'}}>Shuffle (Debug)</button> */}
             </div>
         );
     }
@@ -88,7 +107,7 @@ const Sidebar = ({ mode, setMode }) => {
                         return (
                             <Reorder.Item key={game.id} value={game} className="game-tile-wrapper">
                                 <div
-                                    className="game-tile"
+                                    className={`game-tile ${suggestedTileId === game.id ? 'suggested-tile-glow' : ''}`}
                                     onClick={() => handleGameClick(game)}
                                     style={{
                                         backgroundImage: coverImage ? `url(${coverImage})` : 'none',
@@ -152,6 +171,6 @@ const Sidebar = ({ mode, setMode }) => {
     }
 
     return <div className="sidebar">Unknown Mode</div>;
-};
+});
 
 export default Sidebar;
