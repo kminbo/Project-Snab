@@ -1,5 +1,32 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { SYSTEM_PROMPT } from "./systemPrompt.js";
+
+// Safety settings tuned for mental health context:
+// - Allow users to safely discuss difficult emotions (anxiety, anger, fear)
+// - Block genuinely harmful content (suicide/self-harm, harassment, hate speech)
+// - Balance openness with protection, as a therapist must do
+const safetySettings = [
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+];
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -21,6 +48,7 @@ export function startChat() {
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
     systemInstruction: SYSTEM_PROMPT,
+    safetySettings,
   });
 
   chat = model.startChat();

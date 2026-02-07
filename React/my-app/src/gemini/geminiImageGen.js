@@ -3,6 +3,25 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent";
 
+const safetySettings = [
+  {
+    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+    threshold: "BLOCK_LOW_AND_ABOVE",
+  },
+  {
+    category: "HARM_CATEGORY_HARASSMENT",
+    threshold: "BLOCK_LOW_AND_ABOVE",
+  },
+  {
+    category: "HARM_CATEGORY_HATE_SPEECH",
+    threshold: "BLOCK_MEDIUM_AND_ABOVE",
+  },
+  {
+    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    threshold: "BLOCK_MEDIUM_AND_ABOVE",
+  },
+];
+
 export async function generateHealingArtwork(base64ImageData) {
   if (!API_KEY) {
     throw new Error("VITE_GEMINI_API_KEY is not set in environment variables");
@@ -32,6 +51,7 @@ export async function generateHealingArtwork(base64ImageData) {
       generationConfig: {
         responseModalities: ["TEXT", "IMAGE"],
       },
+      safetySettings,
     }),
   });
 
