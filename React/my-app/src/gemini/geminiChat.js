@@ -18,20 +18,12 @@ export function startChat() {
     initializeGemini();
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-  chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [{ text: `System: ${SYSTEM_PROMPT}` }],
-      },
-      {
-        role: "model",
-        parts: [{ text: "Understood. I will follow these instructions." }],
-      },
-    ],
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: SYSTEM_PROMPT,
   });
+
+  chat = model.startChat();
 
   return chat;
 }
