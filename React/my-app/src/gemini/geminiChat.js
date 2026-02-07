@@ -38,6 +38,22 @@ export async function sendMessage(userMessage) {
   return response.text();
 }
 
+export async function sendMessageStream(userMessage, onChunk) {
+  if (!chat) {
+    startChat();
+  }
+
+  const result = await chat.sendMessageStream(userMessage);
+  let accumulated = "";
+
+  for await (const chunk of result.stream) {
+    accumulated += chunk.text();
+    onChunk(accumulated);
+  }
+
+  return accumulated;
+}
+
 export function resetChat() {
   chat = null;
 }

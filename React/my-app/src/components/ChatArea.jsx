@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { initializeGemini, sendMessage, resetChat } from '../gemini/geminiChat';
+import { initializeGemini, sendMessageStream, resetChat } from '../gemini/geminiChat';
 import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
 const ChatArea = ({ sidebarMode }) => {
@@ -10,6 +10,9 @@ const ChatArea = ({ sidebarMode }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [voiceEnabled, setVoiceEnabled] = useState(false);
     const messagesEndRef = useRef(null);
+    const streamTargetRef = useRef('');
+    const streamDoneRef = useRef(false);
+    const revealIntervalRef = useRef(null);
 
     useEffect(() => {
         try {
@@ -34,6 +37,32 @@ const ChatArea = ({ sidebarMode }) => {
         setInputText('');
         setIsLoading(true);
 
+        const agentMsgId = Date.now() + 1;
+        streamTargetRef.current = '';
+        streamDoneRef.current = false;
+        let displayLen = 0;
+
+        setMessages(prev => [...prev, {
+            id: agentMsgId,
+            sender: 'agent',
+            text: ''
+        }]);
+
+        // Smooth typewriter: reveal chars at a steady rate instead of in bursts
+        revealIntervalRef.current = setInterval(() => {
+            const target = streamTargetRef.current;
+            if (displayLen < target.length) {
+                const behind = target.length - displayLen;
+                const step = behind > 80 ? 4 : behind > 40 ? 3 : 1;
+                displayLen = Math.min(displayLen + step, target.length);
+                setMessages(prev => prev.map(msg =>
+                    msg.id === agentMsgId ? { ...msg, text: target.slice(0, displayLen) } : msg
+                ));
+            } else if (streamDoneRef.current) {
+                clearInterval(revealIntervalRef.current);
+            }
+        }, 20);
+
         try {
             // Contextualize the message based on sidebar mode
             let contextPrefix = "";
@@ -42,30 +71,34 @@ const ChatArea = ({ sidebarMode }) => {
                 contextPrefix = `[User is currently in "${modeName}" view] `;
             }
 
-            const responseText = await sendMessage(contextPrefix + userText);
+            const finalText = await sendMessageStream(contextPrefix + userText, (accumulated) => {
+                streamTargetRef.current = accumulated;
+            });
 
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                sender: 'agent',
-                text: responseText
-            }]);
+            streamDoneRef.current = true;
 
             if (voiceEnabled) {
-                speakText(responseText).catch(console.error);
+                speakText(finalText).catch(console.error);
             }
         } catch (error) {
             console.error("Error sending message:", error);
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                sender: 'agent',
-                text: "I'm sorry, I encountered an error responding to that."
-            }]);
+            clearInterval(revealIntervalRef.current);
+            setMessages(prev => prev.map(msg =>
+                msg.id === agentMsgId
+                    ? { ...msg, text: "I'm sorry, I encountered an error responding to that." }
+                    : msg
+            ));
         } finally {
             setIsLoading(false);
         }
     };
 
+    useEffect(() => {
+        return () => clearInterval(revealIntervalRef.current);
+    }, []);
+
     const handleReset = () => {
+        clearInterval(revealIntervalRef.current);
         resetChat();
         stopAudio();
         setMessages([{ id: Date.now(), sender: 'agent', text: 'Chat reset. How can I help you now?' }]);
@@ -83,14 +116,11 @@ const ChatArea = ({ sidebarMode }) => {
             <div className="messages-list">
                 {messages.map((msg) => (
                     <div key={msg.id} className={`message-bubble ${msg.sender}`}>
-                        {msg.text}
+                        {msg.sender === 'agent' && msg.text === '' ? (
+                            <span className="loading-dots">Thinking...</span>
+                        ) : msg.text}
                     </div>
                 ))}
-                {isLoading && (
-                    <div className="message-bubble agent">
-                        <span className="loading-dots">Thinking...</span>
-                    </div>
-                )}
                 <div ref={messagesEndRef} />
             </div>
             <div className="input-area">
