@@ -9,7 +9,7 @@ const ChatPage = () => {
     return (
         <div className="chat-page">
             <div className="chat-area-container">
-                <ChatArea />
+                <ChatArea sidebarMode={sidebarMode} />
             </div>
             <div className="sidebar-container">
                 <Sidebar mode={sidebarMode} setMode={setSidebarMode} />
