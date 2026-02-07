@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { Reorder } from 'framer-motion';
 import '../App.css';
 import { getGames } from '../data/gameRegistry';

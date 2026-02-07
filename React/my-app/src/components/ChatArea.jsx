@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { initializeGemini, sendMessage, resetChat } from '../gemini/geminiChat';
 import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
-const ChatArea = ({ sidebarMode }) => {
+const ChatArea = (props) => {
+    const { sidebarMode } = props;
     const [messages, setMessages] = useState([
         { id: 1, sender: 'agent', text: 'Hey What\'s up?' },
     ]);
