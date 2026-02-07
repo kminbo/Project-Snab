@@ -69,21 +69,9 @@ export default function Chatbot() {
     <div style={styles.container}>
       <div style={styles.header}>
         <h2 style={styles.title}>Gemini Chatbot</h2>
-        <div style={styles.headerButtons}>
-          <button
-            onClick={toggleVoice}
-            style={{
-              ...styles.voiceButton,
-              ...(voiceEnabled ? styles.voiceButtonActive : {}),
-            }}
-            title={voiceEnabled ? "Voice On" : "Voice Off"}
-          >
-            {voiceEnabled ? "🔊" : "🔇"}
-          </button>
-          <button onClick={handleReset} style={styles.resetButton}>
-            Reset
-          </button>
-        </div>
+        <button onClick={handleReset} style={styles.resetButton}>
+          Reset
+        </button>
       </div>
 
       <div style={styles.messagesContainer}>
@@ -104,6 +92,17 @@ export default function Chatbot() {
       </div>
 
       <form onSubmit={handleSubmit} style={styles.form}>
+        <button
+          type="button"
+          onClick={toggleVoice}
+          style={{
+            ...styles.voiceButton,
+            ...(voiceEnabled ? styles.voiceButtonActive : {}),
+          }}
+          title={voiceEnabled ? "Voice On" : "Voice Off"}
+        >
+          {voiceEnabled ? "🔊" : "🔇"}
+        </button>
         <input
           type="text"
           value={input}
@@ -143,23 +142,18 @@ const styles = {
     margin: 0,
     fontSize: "18px",
   },
-  headerButtons: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
-  },
   voiceButton: {
-    padding: "6px 12px",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    color: "white",
-    border: "1px solid rgba(255,255,255,0.3)",
+    padding: "10px 12px",
+    backgroundColor: "#f5f5f5",
+    border: "1px solid #ccc",
     borderRadius: "4px",
     cursor: "pointer",
     fontSize: "16px",
+    marginRight: "8px",
   },
   voiceButtonActive: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-    color: "#4285f4",
+    backgroundColor: "#4285f4",
+    borderColor: "#4285f4",
   },
   resetButton: {
     padding: "6px 12px",

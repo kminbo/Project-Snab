@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { initializeGemini, sendMessage, resetChat } from '../gemini/geminiChat';
+import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
 const ChatArea = ({ sidebarMode }) => {
     const [messages, setMessages] = useState([
@@ -7,6 +8,7 @@ const ChatArea = ({ sidebarMode }) => {
     ]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [voiceEnabled, setVoiceEnabled] = useState(false);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -47,6 +49,10 @@ const ChatArea = ({ sidebarMode }) => {
                 sender: 'agent',
                 text: responseText
             }]);
+
+            if (voiceEnabled) {
+                speakText(responseText).catch(console.error);
+            }
         } catch (error) {
             console.error("Error sending message:", error);
             setMessages(prev => [...prev, {
@@ -61,7 +67,15 @@ const ChatArea = ({ sidebarMode }) => {
 
     const handleReset = () => {
         resetChat();
+        stopAudio();
         setMessages([{ id: Date.now(), sender: 'agent', text: 'Chat reset. How can I help you now?' }]);
+    };
+
+    const toggleVoice = () => {
+        if (voiceEnabled) {
+            stopAudio();
+        }
+        setVoiceEnabled(!voiceEnabled);
     };
 
     return (
@@ -80,6 +94,19 @@ const ChatArea = ({ sidebarMode }) => {
                 <div ref={messagesEndRef} />
             </div>
             <div className="input-area">
+                <button
+                    onClick={toggleVoice}
+                    className="voice-button"
+                    title={voiceEnabled ? "Voice On" : "Voice Off"}
+                    style={{
+                        marginRight: '10px',
+                        backgroundColor: voiceEnabled ? '#4285f4' : '#6c757d',
+                        fontSize: '16px',
+                        padding: '8px 12px'
+                    }}
+                >
+                    {voiceEnabled ? '🔊' : '🔇'}
+                </button>
                 <button onClick={handleReset} className="reset-button" title="Reset Chat" style={{ marginRight: '10px', backgroundColor: '#6c757d' }}>
                     ↺
                 </button>
