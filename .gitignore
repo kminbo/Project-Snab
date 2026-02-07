@@ -293,3 +293,6 @@ antigravity-reports/
 .antigravity.env
 .antigravity.secrets.json
 
+# Claude Code
+CLAUDE.md
+.claude/
