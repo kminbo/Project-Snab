@@ -248,15 +248,37 @@ body {
   border-radius: 12px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
+  /* Align text to bottom */
   cursor: pointer;
   font-weight: bold;
   color: white;
   transition: background-color 0.2s;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .game-tile:hover {
   background-color: #57a67d;
+  /* Fallback hover color */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.game-tile-overlay {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px;
+  text-align: center;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.game-interface-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Placeholders */

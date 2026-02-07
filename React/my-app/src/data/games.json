@@ -1,0 +1,23 @@
+[
+  {
+    "id": "game-1",
+    "name": "Thera",
+    "coverImage": "THERA.jpg",
+    "description": "A therapeutic game experience.",
+    "component": "Game1"
+  },
+  {
+    "id": "game-2",
+    "name": "Reaction Test",
+    "coverImage": "react.svg",
+    "description": "Test your reaction time.",
+    "component": "Game1"
+  },
+  {
+    "id": "game-3",
+    "name": "Unknown Game",
+    "coverImage": "missing.jpg",
+    "description": "A game with no cover.",
+    "component": "Game1"
+  }
+]
