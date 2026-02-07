@@ -1,30 +1,37 @@
 [
   {
     "id": "game-1",
-    "name": "Thera",
-    "coverImage": "THERA.jpg",
-    "description": "A therapeutic game experience.",
-    "component": "Game1"
+    "name": "Dragon Flyer",
+    "coverImage": "dragon-flyer-cover.png",
+    "description": "A calming game where you guide a dragon to catch eggs. No time limit, no pressure.",
+    "component": "EggFly"
   },
   {
     "id": "game-2",
-    "name": "Reaction Test",
-    "coverImage": "react.svg",
-    "description": "Test your reaction time.",
-    "component": "Game1"
+    "name": "Crystal Race",
+    "coverImage": "crystal-race-cover.png",
+    "description": "Race to collect crystals!",
+    "component": "CrystalRace"
   },
   {
     "id": "game-3",
-    "name": "Unknown Game",
-    "coverImage": "missing.jpg",
-    "description": "A game with no cover.",
-    "component": "Game1"
+    "name": "Glitter Maze",
+    "coverImage": "glitter-maze-cover.png",
+    "description": "Navigate the maze and find the glitter.",
+    "component": "GlitterMaze"
   },
   {
     "id": "game-4",
-    "name": "Dragon Flyer",
-    "coverImage": "dragon-flyer.jpg",
-    "description": "A calming game where you guide a dragon to catch eggs. No time limit, no pressure.",
-    "component": "DragonFlyer"
+    "name": "Magic Paint",
+    "coverImage": "magic-paint-cover.png",
+    "description": "Unleash your creativity with magic paint.",
+    "component": "MagicPaint"
+  },
+  {
+    "id": "game-5",
+    "name": "Star Catcher",
+    "coverImage": "star-catcher-cover.png",
+    "description": "Catch falling stars!",
+    "component": "StarCatcher"
   }
 ]

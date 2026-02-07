@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const DragonFlyer = () => {
+const EggFly = () => {
     const containerRef = useRef(null);
     const [dragonPos, setDragonPos] = useState({ x: 200, y: 200 });
     const [targetPos, setTargetPos] = useState({ x: 200, y: 200 });
     const [eggs, setEggs] = useState([]);
     const [caughtAnimation, setCaughtAnimation] = useState([]);
+    const [eggCount, setEggCount] = useState(0);
+    const [target, setTarget] = useState(5);
+    const [targetIncrement, setTargetIncrement] = useState(5);
+    const [showTargetMessage, setShowTargetMessage] = useState(false);
     const animationRef = useRef(null);
     const eggIdRef = useRef(0);
 
@@ -100,6 +104,7 @@ const DragonFlyer = () => {
 
             if (caught.length > 0) {
                 setCaughtAnimation(prev => [...prev, ...caught.map(e => ({ ...e, time: Date.now() }))]);
+                setEggCount(prev => prev + caught.length);
                 setTimeout(() => {
                     setCaughtAnimation(prev => prev.filter(a => Date.now() - a.time < 600));
                 }, 700);
@@ -108,6 +113,18 @@ const DragonFlyer = () => {
             return remaining;
         });
     }, [dragonPos]);
+
+    // Check if target is reached
+    useEffect(() => {
+        if (eggCount >= target) {
+            setShowTargetMessage(true);
+            setTarget(prev => prev + targetIncrement);
+            setTargetIncrement(prev => prev + 5);
+            setTimeout(() => {
+                setShowTargetMessage(false);
+            }, 2000);
+        }
+    }, [eggCount, target, targetIncrement]);
 
     // Calculate dragon rotation based on movement direction
     const [rotation, setRotation] = useState(0);
@@ -151,20 +168,48 @@ const DragonFlyer = () => {
                 pointerEvents: 'none',
             }} />
 
-            {/* Instructions */}
+            {/* Counter and Target Display */}
             <div style={{
                 position: 'absolute',
                 top: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: 'rgba(255,255,255,0.4)',
-                fontSize: '14px',
+                left: '20px',
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '18px',
                 fontFamily: 'system-ui, sans-serif',
-                textAlign: 'center',
+                fontWeight: 'bold',
                 pointerEvents: 'none',
+                background: 'rgba(0,0,0,0.3)',
+                padding: '10px 15px',
+                borderRadius: '8px',
+                backdropFilter: 'blur(5px)',
             }}>
-                Guide your dragon to catch the eggs
+                🥚 {eggCount} / {target}
             </div>
+
+            {/* Achievement Message */}
+            {showTargetMessage && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    color: '#fff',
+                    fontSize: '24px',
+                    fontFamily: 'system-ui, sans-serif',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    pointerEvents: 'none',
+                    background: 'rgba(100,200,100,0.9)',
+                    padding: '20px 40px',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                    animation: 'targetAchieved 2s ease-out',
+                    zIndex: 100,
+                }}>
+                    ✨ Target Achieved! ✨<br />
+                    <span style={{ fontSize: '18px' }}>New target unlocked: {target}</span>
+                </div>
+            )}
 
             {/* Eggs */}
             {eggs.map(egg => (
@@ -230,9 +275,16 @@ const DragonFlyer = () => {
                     50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
                     100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) translateY(-20px); }
                 }
+                @keyframes targetAchieved {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+                    10% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+                    20% { transform: translate(-50%, -50%) scale(1); }
+                    90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+                }
             `}</style>
         </div>
     );
 };
 
-export default DragonFlyer;
+export default EggFly;
