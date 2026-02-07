@@ -4,7 +4,7 @@ import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
 const ChatArea = ({ sidebarMode }) => {
     const [messages, setMessages] = useState([
-        { id: 1, sender: 'agent', text: 'Hello! I am your mental health coach. How can I help you today?' },
+        { id: 1, sender: 'agent', text: 'Hey What\'s up?' },
     ]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);

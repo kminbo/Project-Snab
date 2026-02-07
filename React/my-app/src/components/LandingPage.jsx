@@ -10,7 +10,7 @@ const LandingPage = ({ onEnter }) => {
     >
       <div className="landing-content">
         <button className="enter-button" onClick={onEnter}>
-          Enter Chat
+          Let the magic begin
         </button>
       </div>
     </div>

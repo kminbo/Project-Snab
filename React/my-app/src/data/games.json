@@ -19,5 +19,12 @@
     "coverImage": "missing.jpg",
     "description": "A game with no cover.",
     "component": "Game1"
+  },
+  {
+    "id": "game-4",
+    "name": "Dragon Flyer",
+    "coverImage": "dragon-flyer.jpg",
+    "description": "A calming game where you guide a dragon to catch eggs. No time limit, no pressure.",
+    "component": "DragonFlyer"
   }
 ]
