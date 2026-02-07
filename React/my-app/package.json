@@ -12,6 +12,7 @@
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.34.0",
     "@google/generative-ai": "^0.24.1",
+    "framer-motion": "^12.33.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
