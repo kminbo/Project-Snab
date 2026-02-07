@@ -89,7 +89,6 @@ body {
   flex-direction: column;
   background-color: #000000;
   position: relative;
-  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -121,6 +120,22 @@ body {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  scrollbar-width: thin;
+  scrollbar-color: #333 #000;
+}
+
+.messages-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-list::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+  border: 2px solid #000;
 }
 
 .message-bubble {
@@ -271,10 +286,27 @@ body {
   flex-shrink: 0;
 }
 
+
 .back-button:hover {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   transform: translateX(-2px);
+}
+
+/* Specific to game selection: Remove horizontal padding from sidebar so list touches edge */
+.sidebar.game-selection {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Restore margin for header and back button since sidebar padding is gone */
+.sidebar.game-selection .back-button {
+  margin-left: 20px;
+}
+
+.sidebar.game-selection h3 {
+  padding: 0 20px;
+  /* Use padding instead of margin to keep centering correct */
 }
 
 /* Game Selection */
@@ -294,7 +326,7 @@ body {
   flex-direction: column;
   gap: 14px;
   overflow-y: auto;
-  padding: 4px;
+  padding: 10px 20px;
   flex: 1;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
