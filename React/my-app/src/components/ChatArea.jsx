@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+//<<<<<<< Agent-Feature-Developement
 import { initializeGemini, sendMessage, resetChat, analyzeConfirmation, analyzeTheme } from '../gemini/geminiChat';
+//=======
+//import { initializeGemini, sendMessageStream, resetChat } from '../gemini/geminiChat';
+//>>>>>>> main
 import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
 const ChatArea = (props) => {
@@ -11,6 +15,9 @@ const ChatArea = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [voiceEnabled, setVoiceEnabled] = useState(false);
     const messagesEndRef = useRef(null);
+    const streamTargetRef = useRef('');
+    const streamDoneRef = useRef(false);
+    const revealIntervalRef = useRef(null);
 
     // Track if we have successfully suggested a theme/tool
     const hasSuggestedThemeRef = useRef(false);
@@ -39,6 +46,32 @@ const ChatArea = (props) => {
         setMessages(prev => [...prev, newMessage]);
         setInputText('');
         setIsLoading(true);
+
+        const agentMsgId = Date.now() + 1;
+        streamTargetRef.current = '';
+        streamDoneRef.current = false;
+        let displayLen = 0;
+
+        setMessages(prev => [...prev, {
+            id: agentMsgId,
+            sender: 'agent',
+            text: ''
+        }]);
+
+        // Smooth typewriter: reveal chars at a steady rate instead of in bursts
+        revealIntervalRef.current = setInterval(() => {
+            const target = streamTargetRef.current;
+            if (displayLen < target.length) {
+                const behind = target.length - displayLen;
+                const step = behind > 80 ? 4 : behind > 40 ? 3 : 1;
+                displayLen = Math.min(displayLen + step, target.length);
+                setMessages(prev => prev.map(msg =>
+                    msg.id === agentMsgId ? { ...msg, text: target.slice(0, displayLen) } : msg
+                ));
+            } else if (streamDoneRef.current) {
+                clearInterval(revealIntervalRef.current);
+            }
+        }, 20);
 
         try {
             let systemInjection = "";
@@ -105,35 +138,43 @@ const ChatArea = (props) => {
                 contextPrefix = `[User is currently in "${modeName}" view] `;
             }
 
+//<<<<<<< Agent-Feature-Developement
             // Send actual message with injected system instruction to guide the agent's response
             const fullPrompt = systemInjection + contextPrefix + userText;
             console.log("--- DEBUG: SENDING MESSAGE ---");
             console.log("System Injection:", systemInjection);
             console.log("Full Prompt:", fullPrompt);
             const responseText = await sendMessage(fullPrompt);
+//=======
+//            const finalText = await sendMessageStream(contextPrefix + userText, (accumulated) => {
+//                streamTargetRef.current = accumulated;
+//            });
+//>>>>>>> main
 
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                sender: 'agent',
-                text: responseText
-            }]);
+            streamDoneRef.current = true;
 
             if (voiceEnabled) {
-                speakText(responseText).catch(console.error);
+                speakText(finalText).catch(console.error);
             }
         } catch (error) {
             console.error("Error sending message:", error);
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                sender: 'agent',
-                text: "I'm sorry, I encountered an error responding to that."
-            }]);
+            clearInterval(revealIntervalRef.current);
+            setMessages(prev => prev.map(msg =>
+                msg.id === agentMsgId
+                    ? { ...msg, text: "I'm sorry, I encountered an error responding to that." }
+                    : msg
+            ));
         } finally {
             setIsLoading(false);
         }
     };
 
+    useEffect(() => {
+        return () => clearInterval(revealIntervalRef.current);
+    }, []);
+
     const handleReset = () => {
+        clearInterval(revealIntervalRef.current);
         resetChat();
         stopAudio();
         // Reset theme tracking on chat reset
@@ -154,14 +195,11 @@ const ChatArea = (props) => {
             <div className="messages-list">
                 {messages.map((msg) => (
                     <div key={msg.id} className={`message-bubble ${msg.sender}`}>
-                        {msg.text}
+                        {msg.sender === 'agent' && msg.text === '' ? (
+                            <span className="loading-dots">Thinking...</span>
+                        ) : msg.text}
                     </div>
                 ))}
-                {isLoading && (
-                    <div className="message-bubble agent">
-                        <span className="loading-dots">Thinking...</span>
-                    </div>
-                )}
                 <div ref={messagesEndRef} />
             </div>
             <div className="input-area">
