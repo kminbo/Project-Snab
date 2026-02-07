@@ -9,6 +9,7 @@ import visualizerCover from '../assets/ModeCovers/visualizer-cover.jpg';
 
 const Sidebar = forwardRef(({ mode, setMode }, ref) => {
     const [activeGame, setActiveGame] = useState(null);
+    const [suggestedTileId, setSuggestedTileId] = useState(null);
 
     // Initialize standard games list
     const initialGames = useMemo(() => getGames(), []);
@@ -32,6 +33,7 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
                 newTiles.unshift(targetTile);
                 setModeTiles(newTiles);
                 setMode(targetModeId); // Auto-navigate to it
+                setSuggestedTileId(targetModeId); // Highlight it
             }
         },
         reorderGameTiles: (targetGameName) => {
@@ -42,6 +44,7 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
                 newTiles.unshift(targetTile);
                 setGameTiles(newTiles);
                 setMode('game_selection'); // Go to game selection to show it
+                setSuggestedTileId(targetTile.id); // Highlight it (using ID from game object)
             }
         }
     }));
@@ -49,6 +52,9 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
     const handleGameClick = (game) => {
         setActiveGame(game);
         setMode('game_play');
+        if (suggestedTileId === game.id) {
+            setSuggestedTileId(null); // Remove highlight on click
+        }
     };
 
     // Helper to render the back button
@@ -66,8 +72,11 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
                     {modeTiles.map((tile) => (
                         <Reorder.Item key={tile.id} value={tile} className="mode-tile-wrapper" style={{ listStyle: 'none' }}>
                             <div
-                                className="game-tile"
-                                onClick={() => setMode(tile.id)}
+                                className={`game-tile ${suggestedTileId === tile.id ? 'suggested-tile-glow' : ''}`}
+                                onClick={() => {
+                                    setMode(tile.id);
+                                    if (suggestedTileId === tile.id) setSuggestedTileId(null);
+                                }}
                                 style={{
                                     backgroundImage: `url(${tile.coverImage})`,
                                     backgroundSize: 'cover',
@@ -98,7 +107,7 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
                         return (
                             <Reorder.Item key={game.id} value={game} className="game-tile-wrapper">
                                 <div
-                                    className="game-tile"
+                                    className={`game-tile ${suggestedTileId === game.id ? 'suggested-tile-glow' : ''}`}
                                     onClick={() => handleGameClick(game)}
                                     style={{
                                         backgroundImage: coverImage ? `url(${coverImage})` : 'none',
