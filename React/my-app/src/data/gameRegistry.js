@@ -1,10 +1,11 @@
 import gamesData from './games.json';
 import Game1 from '../games/Game1';
+import DragonFlyer from '../games/DragonFlyer';
 
 // Mapped components
 const componentMap = {
     'Game1': Game1,
-    // Add other game components here
+    'DragonFlyer': DragonFlyer,
 };
 
 export const getGames = () => {
