@@ -7,6 +7,8 @@ import MindMap from './MindMap';
 import gamesCover from '../assets/ModeCovers/games-cover.jpg';
 import mindMapCover from '../assets/ModeCovers/mind-map-cover.jpg';
 import visualizerCover from '../assets/ModeCovers/visualizer-cover.jpg';
+import mindMapPlaceholder from '../assets/placeholders/mind-map-placeholder.jpg';
+import visualizerPlaceholder from '../assets/placeholders/visualizer-placeholder.jpg';
 
 // Sidebar component that manages and displays therapeutic tools and games
 const Sidebar = forwardRef(({ mode, setMode }, ref) => {
@@ -159,26 +161,47 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
         return (
             <div className="sidebar mind-map">
                 {renderBackButton('mode_selection')}
-                <div className="placeholder-content">
-                    Mind Map Interface
-                </div>
+                <div
+                    className="mind-map-placeholder"
+                    style={{
+                        backgroundImage: `url(${mindMapPlaceholder})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'top center',
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '12px'
+                    }}
+                />
             </div>
         );
     }
+
 
     // 5. Visualizer
     if (mode === 'visualizer') {
         return (
             <div className="sidebar visualizer">
                 {renderBackButton('mode_selection')}
-                <div className="placeholder-content">
-                    Visualizer Interface
-                </div>
+                    <div
+                        className="visualizer-placeholder"
+                        style={{
+                            backgroundImage: `url(${visualizerPlaceholder})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'top center',
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '12px'
+                        }}
+                    />
             </div>
         );
     }
+
 
     return <div className="sidebar">Unknown Mode</div>;
 });
 
 export default Sidebar;
+
+
+
