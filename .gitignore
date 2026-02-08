@@ -264,6 +264,20 @@ $RECYCLE.BIN/
 *~
 .nfs*
 
+####################################
+# Zen Coder / AI tooling
+####################################
+.zen/
+.zencoder/
+.zen-coder/
+.ai-cache/
+.ai/
+.cache/zen*
+.cache/ai*
+*.promptlog
+*.aicache
+
+
 ####################################################
 # Antigravity IDE / Gemini agent specific ignores  #
 ####################################################
@@ -296,3 +310,4 @@ antigravity-reports/
 # Claude Code
 CLAUDE.md
 .claude/
+
