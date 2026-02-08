@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import crystalOne from './symbols/crystal-one.PNG';
+import crystalTwo from './symbols/crystal-two.PNG';
+import crystalThree from './symbols/crystal-three.PNG';
+import crystalFour from './symbols/crystal-four.PNG';
+import crystalFive from './symbols/crystal-five.PNG';
 
 // Screen Dimensions
-const SCREEN_WIDTH = '100%';
-const SCREEN_HEIGHT = '100%';
+const SCREEN_WIDTH = '256.522px';
+const SCREEN_HEIGHT = '773.044px';
 
 // Colors (Approximate matches for standard names)
 const COLORS = {
@@ -12,7 +17,7 @@ const COLORS = {
     LAVENDER: '#00ffa6ff',
     PURPLE: '#800080',
     MAGENTA: '#FF00FF',
-    EMPTY: 'transparent' // or a specific background for the "hole"
+    EMPTY: '#000000' // Black color for the empty tile
 };
 
 // Tile Types
@@ -53,15 +58,10 @@ const CrystalRace = () => {
     const [isSolved, setIsSolved] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
 
-    // Initial Shuffle
-    useEffect(() => {
-        startNewGame();
-    }, []);
-
-    const startNewGame = () => {
+    const handleShuffle = () => {
         let currentGrid = getSolvedGrid();
         // Perform random valid moves to shuffle
-        let emptyIndex = 4; // Starting empty position in solved grid
+        let emptyIndex = 4; // Starting empty position in solved grid (now position [0,4])
         let previousIndex = -1;
 
         for (let i = 0; i < 200; i++) {
@@ -80,6 +80,12 @@ const CrystalRace = () => {
 
         setGrid([...currentGrid]);
         setGameStarted(true);
+        setIsSolved(false);
+    };
+
+    const handleRestart = () => {
+        setGrid(getSolvedGrid());
+        setGameStarted(false);
         setIsSolved(false);
     };
 
@@ -103,7 +109,7 @@ const CrystalRace = () => {
     };
 
     const handleTileClick = (index) => {
-        if (isSolved) return;
+        if (!gameStarted || isSolved) return;
 
         const emptyIndex = grid.indexOf(TILE_TYPES.EMPTY);
         const neighbors = getNeighbors(emptyIndex);
@@ -128,6 +134,23 @@ const CrystalRace = () => {
         return COLORS[type] || 'transparent';
     };
 
+    const getCrystalImage = (type) => {
+        switch (type) {
+            case TILE_TYPES.LIGHT_BLUE:
+                return crystalOne;
+            case TILE_TYPES.BLUE:
+                return crystalTwo;
+            case TILE_TYPES.LAVENDER:
+                return crystalThree;
+            case TILE_TYPES.PURPLE:
+                return crystalFour;
+            case TILE_TYPES.MAGENTA:
+                return crystalFive;
+            default:
+                return null;
+        }
+    };
+
     return (
         <div style={{
             width: SCREEN_WIDTH,
@@ -140,16 +163,21 @@ const CrystalRace = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '20px'
+            paddingTop: '20px',
+            paddingBottom: '20px',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+            boxSizing: 'border-box',
+            gap: '100px'
         }}>
             {/* Grid Container */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, 1fr)',
-                gridTemplateRows: 'repeat(5, 1fr)',
-                width: '80%',
-                maxWidth: '400px',
-                aspectRatio: '1 / 1',
+                gridTemplateRows: '55.4px repeat(4, 1fr)',
+                width: '220px',
+                height: '220px',
+                gap: '2px'
             }}>
                 {grid.map((type, index) => (
                     <div
@@ -158,50 +186,67 @@ const CrystalRace = () => {
                         style={{
                             backgroundColor: getTileColor(type),
                             border: type === TILE_TYPES.EMPTY ? 'none' : '1px solid rgba(0,0,0,0.1)',
-                            cursor: (type !== TILE_TYPES.EMPTY && !isSolved) ? 'pointer' : 'default',
+                            cursor: (type !== TILE_TYPES.EMPTY && gameStarted && !isSolved) ? 'pointer' : 'default',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                             transition: 'background-color 0.2s',
                             boxSizing: 'border-box',
-                            color: type === TILE_TYPES.EMPTY ? '#888' : 'black',
-                            fontSize: '14px',
-                            fontWeight: 'bold'
+                            position: 'relative',
+                            width: '100%',
+                            height: '100%'
                         }}
                     >
-                        {type === TILE_TYPES.EMPTY ? "N/A" : ""}
+                        {type === TILE_TYPES.EMPTY ? (
+                            <span style={{ color: '#888', fontSize: '14px', fontWeight: 'bold' }}>N/A</span>
+                        ) : getCrystalImage(type) ? (
+                            <img
+                                src={getCrystalImage(type)}
+                                alt="crystal"
+                                style={{
+                                    width: '80%',
+                                    height: '80%',
+                                    objectFit: 'contain',
+                                    pointerEvents: 'none'
+                                }}
+                            />
+                        ) : null}
                     </div>
                 ))}
             </div>
 
             <button
-                onClick={startNewGame}
+                onClick={gameStarted ? handleRestart : handleShuffle}
                 style={{
-                    padding: '8px 16px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
+                    padding: '10px 20px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    border: '2px solid #ccc',
+                    borderRadius: '6px',
                     cursor: 'pointer',
                     fontWeight: 'bold',
-                    zIndex: 10
+                    fontSize: '16px',
+                    zIndex: 10,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                 }}
             >
-                {isSolved ? 'Play Again' : 'Reset Game'}
+                {gameStarted ? 'Restart' : 'Shuffle'}
             </button>
 
             {isSolved && (
                 <div style={{
                     position: 'absolute',
-                    top: '30%',
+                    top: '35%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    backgroundColor: 'rgba(0, 255, 0, 0.8)',
-                    padding: '20px',
+                    backgroundColor: 'rgba(0, 255, 0, 0.9)',
+                    padding: '20px 30px',
                     borderRadius: '10px',
                     color: 'white',
                     fontWeight: 'bold',
+                    fontSize: '24px',
                     pointerEvents: 'none',
-                    zIndex: 20
+                    zIndex: 20,
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
                 }}>
                     SOLVED!
                 </div>
