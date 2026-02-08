@@ -56,6 +56,7 @@ export function startChat() {
   return chat;
 }
 
+// Handles sending a standard message to the AI and waiting for the full response
 export async function sendMessage(userMessage) {
   if (!chat) {
     startChat();
@@ -66,6 +67,7 @@ export async function sendMessage(userMessage) {
   return response.text();
 }
 
+// Sends a message and streams the response back for a "typewriter" effect in the UI
 export async function sendMessageStream(userMessage, onChunk) {
   if (!chat) {
     startChat();
@@ -76,16 +78,18 @@ export async function sendMessageStream(userMessage, onChunk) {
 
   for await (const chunk of result.stream) {
     accumulated += chunk.text();
-    onChunk(accumulated);
+    onChunk(accumulated); // Call the provided function with the latest text
   }
 
   return accumulated;
 }
 
+// Resets the chat history to start a fresh conversation
 export function resetChat() {
   chat = null;
 }
 
+// Analyzes the user's message to determine which therapeutic tool (Mind Map, Visualizer, etc.) is most appropriate
 export async function analyzeTheme(userMessage) {
   // Use a fresh model for this analysis to avoiding polluting the main chat
   if (!genAI) {

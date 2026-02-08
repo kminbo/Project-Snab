@@ -53,26 +53,28 @@ const getSolvedGrid = () => {
     return grid;
 };
 
+// Sliding puzzle game designed for focus and emotional regulation
 const CrystalRace = () => {
+    // Current state of the 5x5 grid
     const [grid, setGrid] = useState(getSolvedGrid());
+    // Tracks if the user has successfully solved the puzzle
     const [isSolved, setIsSolved] = useState(false);
+    // Tracks if the game is active (shuffled) or in its initial/reset state
     const [gameStarted, setGameStarted] = useState(false);
 
+    // Shuffles the grid by performing 200 valid random moves to ensure solvability
     const handleShuffle = () => {
         let currentGrid = getSolvedGrid();
-        // Perform random valid moves to shuffle
-        let emptyIndex = 4; // Starting empty position in solved grid (now position [0,4])
+        let emptyIndex = 4; // Starting position of the empty tile
         let previousIndex = -1;
 
         for (let i = 0; i < 200; i++) {
             const neighbors = getNeighbors(emptyIndex);
-            // Avoid immediately undoing the last move if possible
             const validNeighbors = neighbors.filter(n => n !== previousIndex);
             const moveIndex = validNeighbors.length > 0
                 ? validNeighbors[Math.floor(Math.random() * validNeighbors.length)]
                 : neighbors[Math.floor(Math.random() * neighbors.length)];
 
-            // Swap
             swap(currentGrid, emptyIndex, moveIndex);
             previousIndex = emptyIndex;
             emptyIndex = moveIndex;
@@ -83,31 +85,35 @@ const CrystalRace = () => {
         setIsSolved(false);
     };
 
+    // Resets the game to its perfectly arranged, solved state
     const handleRestart = () => {
         setGrid(getSolvedGrid());
         setGameStarted(false);
         setIsSolved(false);
     };
 
+    // Identifies adjacent tiles (Up, Down, Left, Right) that can move into the empty space
     const getNeighbors = (index) => {
         const neighbors = [];
         const row = Math.floor(index / 5);
         const col = index % 5;
 
-        if (row > 0) neighbors.push(index - 5); // Up
-        if (row < 4) neighbors.push(index + 5); // Down
-        if (col > 0) neighbors.push(index - 1); // Left
-        if (col < 4) neighbors.push(index + 1); // Right
+        if (row > 0) neighbors.push(index - 5); 
+        if (row < 4) neighbors.push(index + 5); 
+        if (col > 0) neighbors.push(index - 1); 
+        if (col < 4) neighbors.push(index + 1); 
 
         return neighbors;
     };
 
+    // Swaps two elements in the grid array
     const swap = (arr, i, j) => {
         const temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     };
 
+    // Handles user interaction when clicking a tile to move it
     const handleTileClick = (index) => {
         if (!gameStarted || isSolved) return;
 
@@ -122,6 +128,7 @@ const CrystalRace = () => {
         }
     };
 
+    // Compares the current grid against the solved configuration to detect a win
     const checkWin = (currentGrid) => {
         const solved = getSolvedGrid();
         const isWin = currentGrid.every((tile, i) => tile === solved[i]);
