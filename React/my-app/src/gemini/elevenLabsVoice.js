@@ -18,20 +18,22 @@ function getClient() {
   return client;
 }
 
+// Handles text-to-speech conversion using ElevenLabs API
 export async function speakText(text, voiceId = DEFAULT_VOICE_ID) {
-  // Stop any currently playing audio
+  // Stop any currently playing audio before starting new speech
   stopAudio();
 
   try {
     const elevenlabs = getClient();
 
+    // Request speech synthesis from ElevenLabs
     const audioStream = await elevenlabs.textToSpeech.convert(voiceId, {
       text: text,
       model_id: "eleven_multilingual_v2",
       output_format: "mp3_44100_128",
     });
 
-    // Convert stream to blob
+    // Collect the audio stream chunks into a single Blob
     const chunks = [];
     for await (const chunk of audioStream) {
       chunks.push(chunk);
@@ -39,10 +41,10 @@ export async function speakText(text, voiceId = DEFAULT_VOICE_ID) {
     const audioBlob = new Blob(chunks, { type: "audio/mpeg" });
     const audioUrl = URL.createObjectURL(audioBlob);
 
-    // Play the audio
+    // Create an HTML5 Audio object and play it
     currentAudio = new Audio(audioUrl);
     currentAudio.onended = () => {
-      URL.revokeObjectURL(audioUrl);
+      URL.revokeObjectURL(audioUrl); // Clean up memory after playback
       currentAudio = null;
     };
 
@@ -54,6 +56,7 @@ export async function speakText(text, voiceId = DEFAULT_VOICE_ID) {
   }
 }
 
+// Stops the current voice playback immediately
 export function stopAudio() {
   if (currentAudio) {
     currentAudio.pause();

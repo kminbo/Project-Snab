@@ -4,22 +4,27 @@ import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
 const ChatArea = (props) => {
     const { sidebarMode, onReset } = props;
+    
+    // State to store the conversation history
     const [messages, setMessages] = useState([
         { id: 1, sender: 'agent', text: 'Hey What\'s up?' },
     ]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [voiceEnabled, setVoiceEnabled] = useState(false);
+    
+    // Refs for scrolling and managing the streaming typewriter effect
     const messagesEndRef = useRef(null);
     const streamTargetRef = useRef('');
     const streamDoneRef = useRef(false);
     const revealIntervalRef = useRef(null);
 
-    // Track if we have successfully suggested a theme/tool
+    // Tracks if a therapeutic tool has already been suggested
     const hasSuggestedThemeRef = useRef(false);
-    // Track pending suggestion to wait for user confirmation
+    // Stores a suggestion that is waiting for user confirmation ("Yes"/"No")
     const pendingSuggestionRef = useRef(null);
 
+    // Initialize the Gemini AI connection on mount
     useEffect(() => {
         try {
             initializeGemini();
@@ -29,10 +34,12 @@ const ChatArea = (props) => {
         }
     }, []);
 
+    // Scroll to the bottom whenever a new message is added
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // Main function to handle sending a user message and receiving AI response
     const handleSend = async () => {
         if (!inputText.trim() || isLoading) return;
 
@@ -48,13 +55,14 @@ const ChatArea = (props) => {
         streamDoneRef.current = false;
         let displayLen = 0;
 
+        // Add a placeholder message for the agent's response
         setMessages(prev => [...prev, {
             id: agentMsgId,
             sender: 'agent',
             text: ''
         }]);
 
-        // Smooth typewriter: reveal chars at a steady rate instead of in bursts
+        // Effect to reveal the streaming response character by character for a smooth look
         revealIntervalRef.current = setInterval(() => {
             const target = streamTargetRef.current;
             if (displayLen < target.length) {
@@ -73,28 +81,27 @@ const ChatArea = (props) => {
             let systemInjection = "";
             let shouldAnalyzeTheme = !hasSuggestedThemeRef.current;
 
-            // 1. Check if we are waiting for confirmation
+            // Logic to handle user confirmation of a suggested tool
             if (pendingSuggestionRef.current) {
                 const confirmation = await analyzeConfirmation(userText);
                 console.log("Confirmation usage:", confirmation);
 
                 if (confirmation.isConfirmed) {
-                    // User said YES -> Trigger the pending action
+                    // User accepted the suggestion, trigger navigation
                     if (props.onThemeAction) {
                         const { type, target } = pendingSuggestionRef.current;
                         props.onThemeAction(type, target);
                     }
-                    hasSuggestedThemeRef.current = true; // Mark as done
-                    pendingSuggestionRef.current = null; // Clear pending
-                    shouldAnalyzeTheme = false; // Don't re-analyze theme
+                    hasSuggestedThemeRef.current = true;
+                    pendingSuggestionRef.current = null;
+                    shouldAnalyzeTheme = false;
                     systemInjection = `[SYSTEM: User confirmed suggestion. Action: Navigation triggered. Briefly acknowledge and encourage them.] `;
                 } else {
-                    // User said NO or ignored -> Clear pending, re-analyze?
                     pendingSuggestionRef.current = null;
                 }
             }
 
-            // 2. Analyze Theme (if not confirmed yet and nothing pending)
+            // Logic to analyze the current message for emotional themes if no tool is active
             if (shouldAnalyzeTheme) {
                 const analysis = await analyzeTheme(userText);
                 console.log("Analysis Result:", analysis);

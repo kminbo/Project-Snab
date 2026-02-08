@@ -8,24 +8,29 @@ import gamesCover from '../assets/ModeCovers/games-cover.jpg';
 import mindMapCover from '../assets/ModeCovers/mind-map-cover.jpg';
 import visualizerCover from '../assets/ModeCovers/visualizer-cover.jpg';
 
+// Sidebar component that manages and displays therapeutic tools and games
 const Sidebar = forwardRef(({ mode, setMode }, ref) => {
+    // State to track the currently playing game
     const [activeGame, setActiveGame] = useState(null);
+    // State to highlight a specific tile when the AI suggests it
     const [suggestedTileId, setSuggestedTileId] = useState(null);
 
-    // Initialize standard games list
+    // Initialize list of games and their metadata
     const initialGames = useMemo(() => getGames(), []);
 
-    // Initialize mode tiles state
+    // State for the main mode categories (Games, Mind Map, Visualizer)
     const [modeTiles, setModeTiles] = useState([
         { id: 'game_selection', label: 'Games', coverImage: gamesCover },
         { id: 'mind_map', label: 'Mind Map', coverImage: mindMapCover },
         { id: 'visualizer', label: 'Visualizer', coverImage: visualizerCover }
     ]);
 
-    // Initialize game tiles state
+    // State for the individual game items
     const [gameTiles, setGameTiles] = useState(initialGames);
 
+    // Exposes methods to the parent component to allow AI-driven reordering
     useImperativeHandle(ref, () => ({
+        // Moves a specific mode (like Mind Map) to the top of the list and navigates to it
         reorderModeTiles: (targetModeId) => {
             const index = modeTiles.findIndex(t => t.id === targetModeId);
             if (index > -1) {
@@ -33,10 +38,11 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
                 const [targetTile] = newTiles.splice(index, 1);
                 newTiles.unshift(targetTile);
                 setModeTiles(newTiles);
-                setMode(targetModeId); // Auto-navigate to it
-                setSuggestedTileId(targetModeId); // Highlight it
+                setMode(targetModeId); 
+                setSuggestedTileId(targetModeId); 
             }
         },
+        // Moves a specific game to the top of the game selection list
         reorderGameTiles: (targetGameName) => {
             const index = gameTiles.findIndex(g => g.name === targetGameName);
             if (index > -1) {
@@ -44,12 +50,13 @@ const Sidebar = forwardRef(({ mode, setMode }, ref) => {
                 const [targetTile] = newTiles.splice(index, 1);
                 newTiles.unshift(targetTile);
                 setGameTiles(newTiles);
-                setMode('game_selection'); // Go to game selection to show it
-                setSuggestedTileId(targetTile.id); // Highlight it (using ID from game object)
+                setMode('game_selection'); 
+                setSuggestedTileId(targetTile.id); 
             }
         }
     }));
 
+    // Handles user selection of a game to start playing it
     const handleGameClick = (game) => {
         setActiveGame(game);
         setMode('game_play');
