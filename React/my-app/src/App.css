@@ -468,3 +468,31 @@ body {
 .sidebar.visualizer {
   overflow: hidden;
 }
+
+/* Mic Button */
+.mic-button {
+  padding: 8px 12px;
+  font-size: 16px;
+  margin-right: 10px;
+  background-color: #6c757d;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.mic-button.recording {
+  background-color: #dc3545;
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+.mic-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+}

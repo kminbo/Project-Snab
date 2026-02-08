@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { initializeGemini, sendMessage, sendMessageStream, resetChat, analyzeConfirmation, analyzeTheme } from '../gemini/geminiChat';
 import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
+import { startRecording, stopRecording, transcribeAudio } from '../gemini/elevenLabsStt';
 
 const ChatArea = (props) => {
     const { sidebarMode, onReset } = props;
@@ -12,6 +13,8 @@ const ChatArea = (props) => {
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [voiceEnabled, setVoiceEnabled] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
     
     // Refs for scrolling and managing the streaming typewriter effect
     const messagesEndRef = useRef(null);
@@ -195,6 +198,33 @@ const ChatArea = (props) => {
         setVoiceEnabled(!voiceEnabled);
     };
 
+    const toggleRecording = async () => {
+        if (isRecording) {
+            setIsRecording(false);
+            setIsTranscribing(true);
+            try {
+                const audioBlob = await stopRecording();
+                if (audioBlob) {
+                    const text = await transcribeAudio(audioBlob);
+                    if (text) {
+                        setInputText(prev => prev ? prev + ' ' + text : text);
+                    }
+                }
+            } catch (error) {
+                console.error("STT error:", error);
+            } finally {
+                setIsTranscribing(false);
+            }
+        } else {
+            try {
+                await startRecording();
+                setIsRecording(true);
+            } catch (error) {
+                console.error("Microphone access error:", error);
+            }
+        }
+    };
+
     return (
         <div className="chat-area">
             <div className="messages-list">
@@ -223,6 +253,14 @@ const ChatArea = (props) => {
                 </button>
                 <button onClick={handleReset} className="reset-button" title="Reset Chat" style={{ marginRight: '10px', backgroundColor: '#6c757d' }}>
                     ↺
+                </button>
+                <button
+                    onClick={toggleRecording}
+                    className={`mic-button${isRecording ? ' recording' : ''}`}
+                    title={isRecording ? "Stop Recording" : "Start Recording"}
+                    disabled={isLoading || isTranscribing}
+                >
+                    {isTranscribing ? '...' : isRecording ? '⏹' : '🎤'}
                 </button>
                 <input
                     type="text"
