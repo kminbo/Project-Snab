@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import '../App.css';
 
 const ChatPage = () => {
+    const [resetKey, setResetKey] = useState(0);
     const [sidebarMode, setSidebarMode] = useState('mode_selection');
     const sidebarRef = React.useRef(null);
     const handleThemeAction = (type, target) => {
@@ -16,10 +17,15 @@ const ChatPage = () => {
         }
     };
 
+    const handleReset = () => {
+        setSidebarMode('mode_selection');
+        setResetKey(k => k + 1);
+    };
+
     return (
-        <div className="chat-page">
+        <div className="chat-page" key={resetKey}>
             <div className="chat-area-container">
-                <ChatArea sidebarMode={sidebarMode} onThemeAction={handleThemeAction} />
+                <ChatArea sidebarMode={sidebarMode} onThemeAction={handleThemeAction} onReset={handleReset} />
             </div>
             <div className="sidebar-container">
                 <Sidebar ref={sidebarRef} mode={sidebarMode} setMode={setSidebarMode} />

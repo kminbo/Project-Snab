@@ -3,7 +3,7 @@ import { initializeGemini, sendMessage, sendMessageStream, resetChat, analyzeCon
 import { speakText, stopAudio } from '../gemini/elevenLabsVoice';
 
 const ChatArea = (props) => {
-    const { sidebarMode } = props;
+    const { sidebarMode, onReset } = props;
     const [messages, setMessages] = useState([
         { id: 1, sender: 'agent', text: 'Hey What\'s up?' },
     ]);
@@ -178,7 +178,7 @@ const ChatArea = (props) => {
         // Reset theme tracking on chat reset
         if (hasSuggestedThemeRef.current) hasSuggestedThemeRef.current = false;
         pendingSuggestionRef.current = null;
-        setMessages([{ id: Date.now(), sender: 'agent', text: 'Chat reset. How can I help you now?' }]);
+        if (onReset) onReset();
     };
 
     const toggleVoice = () => {
