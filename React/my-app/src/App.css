@@ -31,51 +31,73 @@ body {
 /* Landing Page Styles */
 .landing-page {
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.landing-bg {
-  position: absolute;
-  top: 0;
-  right: 0;
-
-  width: 100vw;
-  height: 100vh;
-
-  object-fit: cover;
-  object-position: top right;
-}
-
-
-
-.landing-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-  /* Add a semi-transparent background to make the button pop if needed, or keep it minimal */
-}
-
-
-.landing-page {
-  position: relative;          /* REQUIRED */
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
   width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: black;
+  overflow: hidden;
+}
+
+.landing-stars {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20%;
+  max-width: 280px;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.landing-tree {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 85%;
+  width: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.title-image {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 700px;
+  width: 50%;
+  height: auto;
+  z-index: 1;
+}
+
+.landing-right {
+  position: absolute;
+  right: 18%;
+  top: 45%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.tagline {
+  position: absolute;
+  top: 30%;
+  left: 65%;
+  transform: translateX(-50%);
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .enter-button {
-  position: absolute;
-  top: clamp(400px, 4vw, 48px);
-  right: clamp(200px, 3vw, 48px);
-
   padding: clamp(16px, 3vw, 36px)
            clamp(32px, 6vw, 90px);
 
@@ -91,8 +113,6 @@ body {
   box-shadow: 0 12px 35px rgba(102, 126, 234, 0.45);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-
-
 
 .enter-button:hover {
   transform: translateY(-3px) scale(1.05);
